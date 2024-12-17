@@ -32,7 +32,7 @@ public class MainSceneController {
     public TextArea txtEditor;
     public AnchorPane root;
 
-    private SimpleBooleanProperty updateProperty = new SimpleBooleanProperty(false);
+    private final SimpleBooleanProperty updateProperty = new SimpleBooleanProperty(false);
     private File currentFile;
 
     public void initialize() {
