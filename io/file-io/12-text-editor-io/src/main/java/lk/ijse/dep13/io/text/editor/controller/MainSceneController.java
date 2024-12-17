@@ -1,7 +1,10 @@
 package lk.ijse.dep13.io.text.editor.controller;
 
+import javafx.application.Platform;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.event.ActionEvent;
+import javafx.print.Printer;
+import javafx.print.PrinterJob;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.MenuItem;
@@ -14,7 +17,7 @@ import javafx.stage.Stage;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Optional;
 
@@ -38,22 +41,30 @@ public class MainSceneController {
         });
 
         updateProperty.addListener((observable, oldValue, newValue) -> {
-            if (newValue){
+            if (newValue) {
                 if (!getTitle().endsWith("*")) setTitle(getTitle() + " *");
-            }else{
-                if (getTitle().endsWith("*")) setTitle(getTitle().substring(0, getTitle().length() -2));
+            } else {
+                if (getTitle().endsWith("*")) setTitle(getTitle().substring(0, getTitle().length() - 2));
             }
+        });
+
+        Platform.runLater(()->{
+            Stage stage = (Stage) root.getScene().getWindow();
+            stage.setOnCloseRequest(event -> {
+                Optional<ButtonType> buttonType = new Alert(Alert.AlertType.CONFIRMATION, "Are you sure you want to exit?\nAny unsaved changes will be discarded", ButtonType.YES, ButtonType.NO).showAndWait();
+                if (buttonType.get() == ButtonType.NO) event.consume();
+            });
         });
     }
 
-    private void setTitle(String title){
-        Stage stage = (Stage) root.getScene().getWindow();
-        stage.setTitle(title);
-    }
-
-    private String getTitle(){
+    private String getTitle() {
         Stage stage = (Stage) root.getScene().getWindow();
         return stage.getTitle();
+    }
+
+    private void setTitle(String title) {
+        Stage stage = (Stage) root.getScene().getWindow();
+        stage.setTitle(title);
     }
 
     public void initCurrentFile(File currentFile) {
@@ -61,11 +72,11 @@ public class MainSceneController {
     }
 
     public void mnExitOnAction(ActionEvent event) {
-
+        ((Stage) (root.getScene().getWindow())).close();
     }
 
     public void mnNewOnAction(ActionEvent event) {
-        if (updateProperty.get()){
+        if (updateProperty.get()) {
             Optional<ButtonType> buttonType = new Alert(Alert.AlertType.CONFIRMATION, "Are you sure you want to create a new document?\nAny unsaved changes will be discarded", ButtonType.YES, ButtonType.NO).showAndWait();
             if (buttonType.get() == ButtonType.NO) return;
         }
@@ -76,11 +87,11 @@ public class MainSceneController {
     }
 
     public void mnOpenOnAction(ActionEvent event) {
-        if (updateProperty.get()){
+        if (updateProperty.get()) {
             Optional<ButtonType> buttonType = new Alert(Alert.AlertType.CONFIRMATION, "Are you sure you want to open a new document?\nAny unsaved changes will be discarded", ButtonType.YES, ButtonType.NO).showAndWait();
-            if (buttonType.get() == ButtonType.YES){
+            if (buttonType.get() == ButtonType.YES) {
                 txtEditor.clear();
-            }else return;
+            } else return;
         }
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Open Text File");
@@ -106,15 +117,47 @@ public class MainSceneController {
     }
 
     public void mnPrintOnAction(ActionEvent event) {
-
+        PrinterJob printerJob = PrinterJob.createPrinterJob(Printer.getDefaultPrinter());
+        printerJob.showPrintDialog(root.getScene().getWindow());
+        printerJob.printPage(txtEditor);
     }
 
     public void mnSaveAsOnAction(ActionEvent event) {
-
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Save Text File");
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Text File (*.txt)", "*.txt"));
+        File file = fileChooser.showSaveDialog(root.getScene().getWindow());
+        if (!file.getName().endsWith(".txt")) file = new File(file.getAbsolutePath() + ".txt");
+        saveContent(file);
+        if (currentFile == null) {
+            currentFile = file;
+            updateProperty.set(false);
+            setTitle("Text Editor - " + currentFile.getName());
+        }
     }
 
     public void mnSaveOnAction(ActionEvent event) {
+        if (currentFile == null) {
+            FileChooser fileChooser = new FileChooser();
+            fileChooser.setTitle("Save Text File");
+            fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Text File (*.txt)", "*.txt"));
+            currentFile = fileChooser.showSaveDialog(root.getScene().getWindow());
+            if (!currentFile.getName().endsWith(".txt")) currentFile = new File(currentFile.getAbsolutePath() + ".txt");
+            setTitle("Text Editor - " + currentFile.getName());
+        }
+        saveContent(currentFile);
+        updateProperty.set(false);
+    }
 
+    public void saveContent(File file) {
+        try {
+            FileOutputStream fos = new FileOutputStream(file);
+            fos.write(txtEditor.getText().getBytes());
+            fos.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+            new Alert(Alert.AlertType.ERROR, "Failed to save the file, try again").show();
+        }
     }
 
     public void txtEditorOnDragDropped(DragEvent dragEvent) {
