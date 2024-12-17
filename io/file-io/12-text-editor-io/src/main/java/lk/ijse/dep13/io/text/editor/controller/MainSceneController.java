@@ -36,16 +36,16 @@ public class MainSceneController {
     private File currentFile;
 
     public void initialize() {
-        txtEditor.textProperty().addListener((observable, oldValue, newValue) -> {
-            updateProperty.set(true);
-        });
-
         updateProperty.addListener((observable, oldValue, newValue) -> {
             if (newValue) {
                 if (!getTitle().endsWith("*")) setTitle(getTitle() + " *");
             } else {
                 if (getTitle().endsWith("*")) setTitle(getTitle().substring(0, getTitle().length() - 2));
             }
+        });
+
+        txtEditor.textProperty().addListener((observable, oldValue, newValue) -> {
+            updateProperty.set(true);
         });
 
         Platform.runLater(() -> {
@@ -74,7 +74,10 @@ public class MainSceneController {
     }
 
     public void mnExitOnAction(ActionEvent event) {
-        ((Stage) (root.getScene().getWindow())).close();
+        if (updateProperty.get()) {
+            Optional<ButtonType> buttonType = new Alert(Alert.AlertType.CONFIRMATION, "Are you sure you want to exit?\nAny unsaved changes will be discarded", ButtonType.YES, ButtonType.NO).showAndWait();
+            if (buttonType.get() == ButtonType.YES) ((Stage)root.getScene().getWindow()).close();
+        }
     }
 
     public void mnNewOnAction(ActionEvent event) {
