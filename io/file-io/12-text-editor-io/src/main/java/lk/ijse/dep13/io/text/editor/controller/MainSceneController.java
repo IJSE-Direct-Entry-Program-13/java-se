@@ -6,6 +6,8 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TextArea;
+import javafx.scene.input.DragEvent;
+import javafx.scene.input.TransferMode;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
@@ -91,9 +93,8 @@ public class MainSceneController {
     }
 
     private void loadFileContent(File file) {
-        FileInputStream fis = null;
         try {
-            fis = new FileInputStream(file);
+            FileInputStream fis = new FileInputStream(file);
             byte[] bytes = new byte[fis.available()];
             fis.read(bytes);
             txtEditor.setText(new String(bytes));
@@ -116,4 +117,16 @@ public class MainSceneController {
 
     }
 
+    public void txtEditorOnDragDropped(DragEvent dragEvent) {
+        currentFile = dragEvent.getDragboard().getFiles().getFirst();
+        setTitle("Text Editor - " + currentFile.getName());
+        loadFileContent(currentFile);
+        updateProperty.set(false);
+    }
+
+    public void txtEditorOnDragOver(DragEvent dragEvent) {
+        if (dragEvent.getDragboard().hasFiles()) {
+            dragEvent.acceptTransferModes(TransferMode.ANY);
+        }
+    }
 }
