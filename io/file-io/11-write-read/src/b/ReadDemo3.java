@@ -12,7 +12,7 @@ public class ReadDemo3 {
         FileInputStream fis = new FileInputStream(file);
         byte[] bytes = new byte[fis.available()];
         System.out.println(Arrays.toString(bytes));
-        fis.read(bytes);
+        int read = fis.read(bytes);
         System.out.println(Arrays.toString(bytes));
         fis.close();
 //        for (byte aByte : bytes) {
