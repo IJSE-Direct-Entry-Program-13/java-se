@@ -48,11 +48,13 @@ public class MainSceneController {
             }
         });
 
-        Platform.runLater(()->{
+        Platform.runLater(() -> {
             Stage stage = (Stage) root.getScene().getWindow();
             stage.setOnCloseRequest(event -> {
-                Optional<ButtonType> buttonType = new Alert(Alert.AlertType.CONFIRMATION, "Are you sure you want to exit?\nAny unsaved changes will be discarded", ButtonType.YES, ButtonType.NO).showAndWait();
-                if (buttonType.get() == ButtonType.NO) event.consume();
+                if (updateProperty.get()) {
+                    Optional<ButtonType> buttonType = new Alert(Alert.AlertType.CONFIRMATION, "Are you sure you want to exit?\nAny unsaved changes will be discarded", ButtonType.YES, ButtonType.NO).showAndWait();
+                    if (buttonType.get() == ButtonType.NO) event.consume();
+                }
             });
         });
     }
