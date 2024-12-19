@@ -62,10 +62,11 @@ public class MainSceneController {
 
                 FileChannel fcSource = FileChannel.open(source);
                 Files.createFile(target);
-                FileChannel fcTarget = FileChannel.open(target, StandardOpenOption.APPEND);
+                FileChannel fcTarget = FileChannel.open(target, StandardOpenOption.CREATE, StandardOpenOption.WRITE);
                 ByteBuffer buffer = ByteBuffer.allocate(1024 * 10);
                 int read;
                 while ((read = fcSource.read(buffer)) != -1) {
+                    buffer.flip();
                     fcTarget.write(buffer);
                     buffer.clear();
                     updateProgress(read / fcSource.size() * 100, 100);
