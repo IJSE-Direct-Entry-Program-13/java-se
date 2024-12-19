@@ -65,11 +65,12 @@ public class MainSceneController {
                 FileChannel fcTarget = FileChannel.open(target, StandardOpenOption.CREATE, StandardOpenOption.WRITE);
                 ByteBuffer buffer = ByteBuffer.allocate(1024 * 10);
                 int read;
+                int totalRead = 0;
                 while ((read = fcSource.read(buffer)) != -1) {
                     buffer.flip();
                     fcTarget.write(buffer);
                     buffer.clear();
-                    updateProgress(read / fcSource.size() * 100, 100);
+                    updateProgress((totalRead += read) / (double) fcSource.size() * 100, 100);
                 }
                 updateProgress(100, 100);
                 fcSource.close();
@@ -79,6 +80,7 @@ public class MainSceneController {
         };
 
         copyTask.progressProperty().addListener((observable, oldValue, newValue) -> {
+            System.out.println(newValue);
             lblStatus.setText("Copied %.0f%%".formatted(newValue.doubleValue() * 100));
         });
         copyTask.setOnSucceeded(e -> {
@@ -94,8 +96,8 @@ public class MainSceneController {
             new Alert(Alert.AlertType.ERROR, "Failed to copy, try again").showAndWait();
             System.out.println(e.getTarget());
         });
-        pgCopy.progressProperty().bind(copyTask.progressProperty());
         new Thread(copyTask).start();
+        pgCopy.progressProperty().bind(copyTask.progressProperty());
     }
 
     private Path getTargetFilePath(Path source) {
