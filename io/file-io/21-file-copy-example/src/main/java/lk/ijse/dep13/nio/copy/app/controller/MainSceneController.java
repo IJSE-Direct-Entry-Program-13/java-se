@@ -61,8 +61,9 @@ public class MainSceneController {
                 Path target = getTargetFilePath(source);
 
                 FileChannel fcSource = FileChannel.open(source);
-                Files.createFile(target);
-                FileChannel fcTarget = FileChannel.open(target, StandardOpenOption.CREATE, StandardOpenOption.WRITE);
+                FileChannel fcTarget = FileChannel.open(target,
+                        StandardOpenOption.CREATE, StandardOpenOption.WRITE);
+
                 ByteBuffer buffer = ByteBuffer.allocate(1024 * 10);
                 int read;
                 int totalRead = 0;
@@ -80,7 +81,6 @@ public class MainSceneController {
         };
 
         copyTask.progressProperty().addListener((observable, oldValue, newValue) -> {
-            System.out.println(newValue);
             lblStatus.setText("Copied %.0f%%".formatted(newValue.doubleValue() * 100));
         });
         copyTask.setOnSucceeded(e -> {
@@ -97,6 +97,7 @@ public class MainSceneController {
             System.out.println(e.getTarget());
         });
         new Thread(copyTask).start();
+
         pgCopy.progressProperty().bind(copyTask.progressProperty());
     }
 
