@@ -2,7 +2,7 @@ package shared;
 
 import java.io.Serializable;
 
-public class Bottom extends Middle implements Serializable {
+public class Bottom extends Middle {
     private int z = 30;
 
     public Bottom(int z) {

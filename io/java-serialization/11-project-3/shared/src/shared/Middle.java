@@ -1,7 +1,13 @@
 package shared;
 
-public class Middle extends Top{
+import java.io.Serializable;
+
+public class Middle extends Top implements Serializable {
     private int y = 20;
+
+//    public Middle() {
+//        System.out.println("Middle() No arg constructor");
+//    }
 
     public Middle(int y) {
         super(y);
